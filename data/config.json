@@ -1,0 +1,73 @@
+{
+  "system": {
+    "board_name": "Kincony-868a16",
+    "serial_number": "SN-2026-X832",
+    "license": "LIC-XXXX-XXXX",
+    "web_admin": {
+      "login": "admin",
+      "password": "smart20241"
+    }
+  },
+  "network": {
+    "prefer_mode": "ethernet",
+    "use_static": true,
+    "ip_address": "10.199.100.212",
+    "gateway": "10.199.100.1",
+    "subnet": "255.255.255.0",
+    "dns": "8.8.8.8",
+    "dns_from_dhcp": false,
+    "ethernet": {
+      "phy_addr": 0,
+      "mdc_io": 23,
+      "mdio_io": 18,
+      "power_io": -1,
+      "clk_mode": "GPIO0_IN"
+    }
+  },
+  "ntp": {
+    "use_ntp": true,
+    "ntp_server": "pool.ntp.org",
+    "timezone": 3
+  },
+  "server_connection": {
+    "server_ip": "192.168.1.100",
+    "server_port": 4370
+  },
+  "i2c_master": {
+    "sda_io": 9,
+    "scl_io": 10,
+    "clk_speed": 400000
+  },
+  "devices": [
+    {
+      "type": "wiegand",
+      "name": "Reader Group 1",
+      "address": 34,
+      "pins": [0, 1],
+      "group": 1
+    },
+    {
+      "type": "wiegand",
+      "name": "Reader Group 2",
+      "address": 34,
+      "pins": [4, 5],
+      "group": 2
+    }
+  ],
+  "relays": [
+    {
+      "id": 1,
+      "name": "lock",
+      "pin": 8,
+      "group": 1,
+      "default_state": 1
+    },
+    {
+      "id": 9,
+      "name": "relay",
+      "pin": 9,
+      "group": 2,
+      "default_state": 1
+    }
+  ]
+}

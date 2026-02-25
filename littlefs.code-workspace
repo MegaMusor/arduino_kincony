@@ -1,0 +1,21 @@
+{
+	"folders": [
+		{
+			"name": "littlefs",
+			"path": "../littlefs"
+		},
+		{
+			"name": "rc522",
+			"path": "../rc522"
+		},
+		{
+			"name": "rc522ar",
+			"path": "../rc522ar"
+		},
+		{
+			"name": "arduino_kincony",
+			"path": "."
+		}
+	],
+	"settings": {}
+}
