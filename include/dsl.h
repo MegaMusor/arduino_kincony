@@ -2,37 +2,47 @@
 #define DSL_H
 
 #include <Arduino.h>
-#include "HardwareManager.h"
+#include <LittleFS.h>
+#include <deque>
 #include <vector>
-#include <deque> 
+#include <list> // Для хранения списка активных процессов
+#include "HardwareManager.h"
 
 enum DSLAction { ACTION_NONE = 0, ACTION_OPEN, ACTION_CLOSE, ACTION_SLEEP };
 
-// Единая структура для команд
 struct QueuedCommand {
     DSLAction action = ACTION_NONE;
     uint16_t pinMask = 0;
     uint32_t duration = 0;
 };
 
+// Состояние одного запущенного сценария
+struct DSLInstance {
+    std::deque<QueuedCommand> commands;
+    unsigned long nextStepTime = 0;
+    bool isWaiting = false;
+};
+
 class DSLProcessor {
 public:
     DSLProcessor(HardwareManager& hw);
-    void runActionFromFile(int actionIdx);
-    void clearQueue();
     void begin();
-    void execute(String line);   
-    void tick();                 
-  
+    
+    // Запускает НОВЫЙ параллельный процесс
+    void execute(String line); 
+    void runActionFromFile(int actionIdx);
+    
+    // Обновляет ВСЕ запущенные процессы
+    void tick(); 
+    
+    // Остановить вообще всё
+    void stopAll();
 
 private:
     HardwareManager& _hw;
-    std::deque<QueuedCommand> _queue; 
-    unsigned long _nextStepTime = 0;   
-    bool _isWaiting = false;          
+    std::list<DSLInstance> _activeInstances; // Список всех параллельных сценариев
 
-    QueuedCommand parse(String subLine); // Возвращает QueuedCommand
-    void applyImmediate(QueuedCommand cmd);
+    QueuedCommand parseSubCommand(String sub);
 };
 
 #endif

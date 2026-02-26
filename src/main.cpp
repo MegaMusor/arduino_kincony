@@ -23,9 +23,6 @@ void printMemoryStats() {
                   heap_caps_get_free_size(MALLOC_CAP_SPIRAM) / 1024);
 }
 
-/**
- * Логика обработки карты: ТОЛЬКО через DSL
- */
 void onCardRead(uint64_t uid, int groupId) {
     Serial.printf("\n[Wiegand] Card Read: %llu (Group %d)\n", uid, groupId);
     
