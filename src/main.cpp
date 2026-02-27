@@ -24,7 +24,7 @@ void printMemoryStats() {
 }
 
 void onCardRead(uint64_t uid, int groupId) {
-    Serial.printf("\n[Wiegand] Card Read: %llu (Group %d)\n", uid, groupId);
+    Serial.printf("\n[Wiegand] Card Read: %llx (Group %d)\n", uid, groupId);
     
     CardResult result = db.find(uid);
 
@@ -32,10 +32,8 @@ void onCardRead(uint64_t uid, int groupId) {
         bool actionExecuted = false;
 
         for (auto& ins : result.instructions) {
-            // Строгое условие: выполняем только если action > 0
             if (ins.action > 0) {
                 Serial.printf("🚀 DSL Action #%d triggered\n", ins.action);
-                // Индексы в файле начинаются с 0, поэтому (action - 1)
                 dsl.runActionFromFile(ins.action - 1); 
                 actionExecuted = true;
             }
@@ -45,14 +43,14 @@ void onCardRead(uint64_t uid, int groupId) {
             Serial.println("⚠️ Доступ разрешен, но для этой карты/группы не назначен DSL Action (action=0)");
         }
     } else {
-        Serial.printf("❌ Доступ запрещен или карта не найдена. UID: %llu\n", uid);
+        Serial.printf("❌ Доступ запрещен или карта не найдена. UID: %llx\n", uid);
     }
 }
 
 void setup() {
     Serial.begin(115200);
     delay(2000);
-    Serial.println("--- KINCONY A16: DSL ENGINE (STRICT MODE) ---");
+    Serial.println("\n--- KINCONY A16: DSL ENGINE (STRICT MODE) ---");
 
     if (!LittleFS.begin()) Serial.println("❌ LittleFS Error");
 
@@ -62,7 +60,6 @@ void setup() {
         deserializeJson(config, configFile);
         configFile.close();
     }
-
     // Инициализация железа
     hw.init(config);
     
@@ -79,21 +76,45 @@ void setup() {
 
     web.begin();
     printMemoryStats();
+
+    Serial.println("\n--- [ ТЕСТ ПОИСКА КАРТЫ ] ---");
+    uint64_t testUid = 0x11223344556677ULL; 
+    CardResult res = db.find(testUid);
+
+    if (res.found) {
+        Serial.printf("✅ КАРТА НАЙДЕНА!\n");
+        Serial.printf("ID: %llx\n", res.uid);
+        Serial.printf("Статус: %d\n", res.status);
+        Serial.printf("Группа: %d\n", res.group_id);
+        Serial.printf("Лимит: %d\n", res.limit);
+        Serial.printf("Источник: %s\n", res.source.c_str());
+        Serial.printf("Время поиска: %u us\n", res.search_time_us);
+        Serial.printf("Инструкций найдено: %d\n", res.instructions.size());
+
+        for (size_t i = 0; i < res.instructions.size(); i++) {
+            auto& ins = res.instructions[i];
+            Serial.printf("  [%d] Action Index: %d, Priority: %d, Schedule: %d\n", 
+                          i, ins.action, ins.priority, ins.schedule);
+        }
+    } else {
+        Serial.printf("❌ Карта %llx НЕ НАЙДЕНА в базе данных.\n", testUid);
+    }
+    Serial.println("-----------------------------\n");
 }
 
 void loop() {
     web.handle();          // Веб-сервер работает всегда
     hw.updateOutputs();    // Таймеры HardwareManager работают всегда
-    dsl.tick();            // DSL работает параллельно!
+    dsl.tick();            // DSL работает параллельно
 
     if (Serial.available()) {
         String input = Serial.readStringUntil('\n');
         input.trim();
         if (input.length() > 0) {
-            dsl.execute(input); // Просто кладет в очередь и сразу выходит
+            dsl.execute(input); 
             Serial.println("📥 Command queued");
         }
     }
     
-    yield(); // Даем время системным задачам ESP32
+    yield(); 
 }
