@@ -33,20 +33,27 @@ public:
     CardResult find(uint64_t uid);
     
 private:
-    uint8_t* _all_cards = nullptr;    
+    // Массивы карт
+    uint8_t* _cards34 = nullptr;    
+    uint8_t* _cards56 = nullptr;
+    
+    // Таблицы групп и правил
     uint16_t* _all_groups = nullptr;   
     uint32_t* _group_offsets = nullptr; 
     uint8_t* _group_lens = nullptr;    
     uint32_t* _rules_table = nullptr;  
 
-    uint32_t _total_cards = 0;
+    uint32_t _total34 = 0;
+    uint32_t _total56 = 0;
     uint32_t _total_groups = 0;
     uint32_t _total_rules = 0;
 
     bool loadCards();
     bool loadGroups();
     bool loadRules();
-    uint64_t getCardID(uint32_t idx);
+    
+    uint64_t getID34(uint32_t idx);
+    uint64_t getID56(uint32_t idx);
     Instruction unpackInstruction(uint32_t raw);
 };
 
