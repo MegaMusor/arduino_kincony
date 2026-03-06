@@ -7,7 +7,7 @@
 #include <vector>
 #include "map"
 
-#define WIEGAND_TIMEOUT 40 
+#define WIEGAND_TIMEOUT 100 
 
 struct WiegandReader {
     uint8_t addr;

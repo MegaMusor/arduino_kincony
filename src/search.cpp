@@ -18,7 +18,7 @@ bool CardDatabase::loadCards() {
     if (LittleFS.exists("/cards34.bin")) {
         File f = LittleFS.open("/cards34.bin", "r");
         size_t sz = f.size();
-        _total34 = sz / 6;
+        _total34 = sz / 7;
         _cards34 = (uint8_t*)heap_caps_malloc(sz, MALLOC_CAP_SPIRAM);
         if (_cards34) f.read(_cards34, sz);
         f.close();

@@ -11,7 +11,7 @@
   "network": {
     "prefer_mode": "ethernet",
     "use_static": true,
-    "ip_address": "10.199.100.212",
+    "ip_address": "10.199.100.213",
     "gateway": "10.199.100.1",
     "subnet": "255.255.255.0",
     "dns": "8.8.8.8",

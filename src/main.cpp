@@ -8,7 +8,7 @@
 #include "search.h"
 #include "dsl.h"
 
-// Глобальные объекты
+
 JsonDocument config;
 HardwareManager hw;
 WiegandManager wiegand; 
@@ -78,7 +78,8 @@ void setup() {
     printMemoryStats();
 
     Serial.println("\n--- [ ТЕСТ ПОИСКА КАРТЫ ] ---");
-    uint64_t testUid = 0x11223344556677ULL; 
+    uint64_t testUid = 0x0100000002468AULL; 
+    // uint64_t testUid = 0x01000000ULL;
     CardResult res = db.find(testUid);
 
     if (res.found) {
@@ -103,9 +104,9 @@ void setup() {
 }
 
 void loop() {
-    web.handle();          // Веб-сервер работает всегда
-    hw.updateOutputs();    // Таймеры HardwareManager работают всегда
-    dsl.tick();            // DSL работает параллельно
+    web.handle();      
+    hw.updateOutputs();   
+    dsl.tick();           
 
     if (Serial.available()) {
         String input = Serial.readStringUntil('\n');

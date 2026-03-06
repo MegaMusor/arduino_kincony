@@ -37,17 +37,21 @@ void WiegandManager::internalUpdate() {
     unsigned long now = millis();
     
     for (auto r : _readers) {
+        // Читаем состояние один раз за проход
         uint8_t currentData = _hw->fastRead8(r->addr);
         
+        // В Wiegand импульс - это переход из HIGH в LOW
         bool d0 = (currentData >> r->pinD0) & 0x01;
         bool d1 = (currentData >> r->pinD1) & 0x01;
 
+        // Обработка D0 (Бит 0)
         if (d0 == LOW && r->lastD0 == HIGH) {
             r->cardCode <<= 1;
             r->bitCount++;
             r->lastBitTime = now;
         } 
-        else if (d1 == LOW && r->lastD1 == HIGH) {
+        // Обработка D1 (Бит 1) - НЕ используем else if, проверяем оба независимо
+        if (d1 == LOW && r->lastD1 == HIGH) {
             r->cardCode = (r->cardCode << 1) | 1;
             r->bitCount++;
             r->lastBitTime = now;
@@ -56,15 +60,35 @@ void WiegandManager::internalUpdate() {
         r->lastD0 = d0;
         r->lastD1 = d1;
 
-        if (r->bitCount > 0 && (now - r->lastBitTime > WIEGAND_TIMEOUT)) {
+        // Увеличим таймаут до 100мс, чтобы точно дождаться конца медленных карт
+        if (r->bitCount > 0 && (now - r->lastBitTime > 100)) {
             handleCard(r);
         }
     }
 }
 
 void WiegandManager::handleCard(WiegandReader* r) {
-    uint64_t cleanUID = (r->bitCount == 58) ? (r->cardCode >> 1) & 0xFFFFFFFFFFFFFFULL : r->cardCode;
+    uint64_t cleanUID = 0;
+
+    if (r->bitCount == 26) {
+        // Wiegand 26: убираем 1 бит четности в начале и 1 в конце
+        cleanUID = (r->cardCode >> 1) & 0xFFFFFFULL;
+    } 
+    else if (r->bitCount == 34) {
+        // Wiegand 34: убираем 1 бит четности в начале и 1 в конце
+        cleanUID = (r->cardCode >> 1) & 0xFFFFFFFFULL;
+    }
+    else if (r->bitCount == 58) {
+        // Твой текущий вариант для 58 бит
+        cleanUID = (r->cardCode >> 1) & 0xFFFFFFFFFFFFFFULL;
+    } 
+    else {
+        // Если длина нестандартная, берем как есть
+        cleanUID = r->cardCode;
+    }
     
+    Serial.printf("[Wiegand] Raw Bits: %d, Clean UID: %llx\n", r->bitCount, cleanUID);
+
     extern void onCardRead(uint64_t uid, int groupId);
     onCardRead(cleanUID, r->group);
 
